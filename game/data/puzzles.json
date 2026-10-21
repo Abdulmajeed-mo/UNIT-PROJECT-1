@@ -1,0 +1,23 @@
+
+{
+  "1": {
+    "question": "I have keys but open no locks. I have space but contain no rooms. What am I?",
+    "answer": "A keyboard",
+    "hint": "Think of something you use to type."
+  },
+  "2": {
+    "question": "The ancient runes reveal: 3x + 4 = 19. What is x?",
+    "answer": "5",
+    "hint": "Subtract 4 from both sides, then divide by 3."
+  },
+  "3": {
+    "question": "The moon comes before the sun. The root comes after the sun. What is the correct order?",
+    "answer": "Moon, Sun, Root",
+    "hint": "Place the sun between the moon and the root."
+  },
+  "4": {
+    "question": "What truth does the forgotten chronicle reveal?",
+    "answer": "The forest remembers those who enter.",
+    "hint": "Remember the warning at the Silent Gate and the Watcher's words."
+  }
+}

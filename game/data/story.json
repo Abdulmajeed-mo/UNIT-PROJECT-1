@@ -175,32 +175,35 @@
                 }
             ]
         },
+      {
+         "id": 8,
+         "title": "The Missing Chronicle",
+         "description": "Inside the chamber, you find a damaged chronicle describing the ancient forest. Much of the writing has faded, but one question remains: What does the chronicle reveal about the forest?",
+         "choices": [
         {
-            "id": 8,
-            "title": "The Missing Chronicle",
-            "description": "Inside the chamber, you find a damaged chronicle describing the ancient forest. Much of the writing has faded, but one question remains: What does the chronicle reveal about the forest?",
-            "choices": [
-                {
-                    "text": "The forest protects a hidden kingdom.",
-                    "result": "The pages offer no support for this claim."
-                },
-                {
-                    "text": "The forest tests those who enter.",
-                    "result": "The remaining pages confirm that the forest tests every visitor before revealing the way out.",
-                    "puzzle_id": 4,
-                    "correct": true,
-                    "evidence": "The forest tests those who enter before revealing the way out."
-                },
-                {
-                    "text": "The forest was created to trap everyone forever.",
-                    "result": "The chronicle contains no evidence that the forest was made as a prison."
-                },
-                {
-                    "text": "The forest has no purpose.",
-                    "result": "The writing suggests that every trial serves a purpose."
-                }
-            ]
+            "text": "The forest protects a hidden kingdom.",
+            "result": "The pages offer no support for this claim.",
+            "puzzle_id": 4
         },
+        {
+            "text": "The forest tests those who enter.",
+            "result": "The remaining pages confirm that the forest tests every visitor before revealing the way out.",
+            "puzzle_id": 4,
+            "correct": true,
+            "evidence": "The forest tests those who enter before revealing the way out."
+        },
+        {
+            "text": "The forest was created to trap everyone forever.",
+            "result": "The chronicle contains no evidence that the forest was made as a prison.",
+            "puzzle_id": 4
+        },
+        {
+            "text": "The forest has no purpose.",
+            "result": "The writing suggests that every trial serves a purpose.",
+            "puzzle_id": 4
+        }
+    ]
+} ,
         {
             "id": 9,
             "title": "The Last Passage",
