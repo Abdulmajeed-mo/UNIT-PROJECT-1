@@ -1,44 +1,120 @@
-# UNIT-PROJECT-1
+# Eldergrove: The Forgotten Forest
 
+**The forest remembers. Will you escape?**
 
-## Based on what you’ve learned until now , create a project of your choosing (impress us with your imagination) . This project must at least satisfy the following minimum requirements :
+## Overview
 
-- Must be interactive on CLI.
-- Use your coding skills in Python accurately.
-- Organize Your Code into modules & (or packages)
-- Use git & Github to track changes in your code.
+Eldergrove: The Forgotten Forest is an interactive command-line adventure game built with Python. Players explore an ancient, mysterious forest, encounter strange characters, solve riddles, uncover forgotten secrets, and make choices that influence their journey and ultimate fate.
 
-## Example Project :  An online Grocery Store :
+The game combines narrative exploration, puzzle-solving, and decision-making in a text-based experience.
 
-#### Overview : An online store that sells fruits to customers. This online store has 2 main users. The customer and the manager of the store . Each one of them should be able to do the following tasks for the store to function properly . 
+## Features
 
-### Features & User Stories
-#### As a customer I should be able to do the following :
-- Browse  Products . 
-- View the product info (summary, specs, price, quantity , etc.)
-- Search for Products.
-- Get recommendations for my next purchase based on my purchase history.
-- Add Products to the shopping cart .
-- Remove a product from the shopping cart.
-- List the products in my shopping cart. 
-- Continue to checkout . 
-- Fill in my address for delivery.
-- Get receipt of my purchases.
-- Check delivery status . 
+- Interactive command-line gameplay.
+- Story-driven exploration across nine main events.
+- Four main puzzles to challenge the player.
+- Choices and clues that influence the story's outcome.
+- A journal for tracking discovered evidence.
+- Multiple endings based on the player's progress and decisions.
+- Save and resume gameplay.
+- Modular Python code organized into packages and modules.
 
+*Some features are planned for upcoming development and may not yet be implemented.*
 
+## Technologies
 
-#### Usage :
- Explain to the user how to use your project . 
- for example:
- - type in search product_name to search for a product.
- - type in list_products to show all the products in the grocery.
- - type in show product_name to get information about this product.
- - type in buy product_name to buy the product . 
- - and so on...
+- Python
+- JSON for story data
+- Rich for terminal formatting
+- Questionary for interactive prompts
+- Git and GitHub for version control
 
+## User Stories
 
-### For your project. Edit this README.md file to include your own project name,  overview, user stories, and usage. 
+- As a player, I want to explore a mysterious forest so that I can uncover its secrets.
+- As a player, I want to make meaningful choices so that my decisions affect the story.
+- As a player, I want to solve riddles and puzzles to progress through the adventure.
+- As a player, I want to collect clues and review them in a journal.
+- As a player, I want to save my progress and resume the game later.
+- As a player, I want multiple possible endings based on my actions.
 
-### NOTE: before submitting the final project, please do the following command:
-`pip freeze > requirements.txt` to enable use to know & use the packages used in your project.
+## Getting Started
+
+### Prerequisites
+
+- Python 3.13 or a compatible Python version.
+- pip.
+
+### Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone <your-repository-url>
+   ```
+
+2. Navigate to the project directory:
+
+   ```bash
+   cd UNIT-PROJECT-1
+   ```
+
+3. Create and activate a virtual environment:
+
+   ```bash
+   python -m venv .venv
+   ```
+
+   **Windows PowerShell:**
+
+   ```powershell
+   .\.venv\Scripts\Activate.ps1
+   ```
+
+4. Install the dependencies:
+
+   ```bash
+   python -m pip install -r requirements.txt
+   ```
+
+### Usage
+
+Run the game from the project root:
+
+```bash
+python main.py
+```
+
+Follow the on-screen instructions to start a new game, explore the forest, and make your choices.
+
+## Project Structure
+
+```text
+UNIT-PROJECT-1/
+├── game/
+│   ├── data/
+│   │   └── story.json
+│   ├── endings.py
+│   ├── engine.py
+│   ├── journal.py
+│   ├── puzzles.py
+│   ├── save_system.py
+│   ├── story.py
+│   └── __init__.py
+├── ui/
+│   ├── interface.py
+│   └── __init__.py
+├── saves/
+├── main.py
+├── requirements.txt
+├── README.md
+└── .gitignore
+```
+
+## Project Status
+
+This project is being developed as part of the Unit 1 Python programming assessment. Features and documentation will be updated as development progresses.
+
+## License
+
+This project was created for educational purposes.
