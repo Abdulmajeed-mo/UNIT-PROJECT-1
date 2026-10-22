@@ -48,7 +48,7 @@
         {
             "id": 3,
             "title": "The First Riddle",
-            "description": "A stone tablet blocks the trail. Words glow across its surface: 'I have keys but open no locks. I have space but contain no rooms. What am I?'",
+            "description": "An ancient stone tablet blocks your path. A mysterious riddle appears across its glowing surface. Solve it to reveal the hidden passage.",
             "choices": [
                 {
                     "text": "A map",
@@ -98,7 +98,7 @@
         {
             "id": 5,
             "title": "The Rune Equation",
-            "description": "An ancient door bears a glowing equation: 3x + 4 = 19. A voice demands the value of x before the door will open.",
+            "description":  "An ancient door is covered in glowing mathematical runes. A magical equation appears, and the door will only open when you solve it.",
             "choices": [
                 {
                     "text": "x = 3",
@@ -149,7 +149,7 @@
         {
             "id": 7,
             "title": "The Three Forgotten Symbols",
-            "description": "Three stone symbols stand before a sealed chamber: the Moon, the Sun, and the Root. An inscription reads: 'The moon comes before the sun. The root comes after the sun.'",
+            "description": "Three ancient symbols stand before a sealed chamber: the Moon, the Sun, and the Root. A magical inscription challenges you to discover their correct order.",
             "choices": [
                 {
                     "text": "Moon → Sun → Root",
@@ -178,7 +178,7 @@
       {
          "id": 8,
          "title": "The Missing Chronicle",
-         "description": "Inside the chamber, you find a damaged chronicle describing the ancient forest. Much of the writing has faded, but one question remains: What does the chronicle reveal about the forest?",
+         "description": "Inside the chamber, you discover a damaged chronicle containing forgotten truths about Eldergrove. Its final question will test what you have learned.",
          "choices": [
         {
             "text": "The forest protects a hidden kingdom.",

@@ -84,28 +84,30 @@ class Exploration:
         self.completed_locations.add(location_id)
 
     
-def move_to_next_region(self):
-    region = self.get_current_region()
 
-    required_locations = [
-        location["id"]
-        for location in region["locations"]
-        if not location.get("optional", False)
-    ]
+    def move_to_next_region(self):
+        region = self.get_current_region()
 
-    if not all(
-        location_id in self.completed_locations
-        for location_id in required_locations
-    ):
-        print("\nComplete all main locations before leaving this region.")
-        return False
+        required_locations = [
+            location["id"]
+            for location in region["locations"]
+            if not location.get("optional", False)
+        ]
 
-    if self.current_region + 1 >= len(self.regions):
-        print("\nYou have reached the final region.")
-        return False
+        if not all(
+            location_id in self.completed_locations
+            for location_id in required_locations
+        ):
+            print("\nComplete all main locations before leaving this region.")
+            return False
 
-    self.current_region += 1
+        if self.current_region + 1 >= len(self.regions):
+            print("\nYou have reached the final region.")
+            return False
 
-    print(f"\nEntering {self.get_current_region()['name']}...")
-    return True
+        self.current_region += 1
+
+        print(f"\nEntering {self.get_current_region()['name']}...")
+        return True
+
 

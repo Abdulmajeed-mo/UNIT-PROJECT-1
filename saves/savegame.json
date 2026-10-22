@@ -1,0 +1,89 @@
+{
+    "version": 1,
+    "game_state": {
+        "explorer": {
+            "name": "Abdulmajeed",
+            "started_at": "2026-10-22T12:30:42",
+            "playtime_seconds": 76
+        },
+        "exploration": {
+            "current_region": 0,
+            "visited_locations": [
+                "ancient_gate",
+                "forgotten_shrine"
+            ],
+            "completed_locations": [
+                "ancient_gate",
+                "forgotten_shrine"
+            ]
+        },
+        "journal": {
+            "evidence": [
+                "Observe before you act."
+            ],
+            "solved_puzzles": [],
+            "discoveries": []
+        },
+        "scoring": {
+            "scores": {
+                "puzzles": 0,
+                "evidence": 25,
+                "decisions": 40,
+                "secrets": 0
+            },
+            "rewarded_actions": [
+                "evidence:Observe before you act.",
+                "decisions:event_1"
+            ]
+        },
+        "selected_puzzles": {
+            "1": {
+                "question": "I have many rings but no fingers. What am I?",
+                "options": [
+                    "A bell",
+                    "A tree",
+                    "A crown",
+                    "A necklace"
+                ],
+                "correct": 2,
+                "hint": "My rings reveal my age."
+            },
+            "2": {
+                "question": "A stone sequence reads: 3, 6, 12, 24. What comes next?",
+                "options": [
+                    "30",
+                    "36",
+                    "42",
+                    "48"
+                ],
+                "correct": 4,
+                "hint": "Each number is twice the previous one."
+            },
+            "3": {
+                "question": "The root must be first. The moon follows the root. The sun comes last. Choose the order.",
+                "options": [
+                    "Moon, Root, Sun",
+                    "Root, Moon, Sun",
+                    "Sun, Root, Moon",
+                    "Root, Sun, Moon"
+                ],
+                "correct": 2,
+                "hint": "Begin with the root and end with the sun."
+            },
+            "4": {
+                "question": "What truth does the forgotten chronicle reveal?",
+                "options": [
+                    "The forest protects a hidden kingdom.",
+                    "The forest remembers those who enter.",
+                    "The forest has no purpose.",
+                    "The forest is only an illusion."
+                ],
+                "correct": 2,
+                "hint": "Remember the warning at the Silent Gate."
+            }
+        },
+        "previous_choices": {
+            "1": 3
+        }
+    }
+}
