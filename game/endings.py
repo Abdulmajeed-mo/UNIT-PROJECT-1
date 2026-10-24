@@ -5,9 +5,12 @@
 import json
 import random
 from pathlib import Path
+from game.localization import Localization
 
 
 ENDINGS_FILE = Path(__file__).parent / "data" / "endings.json"
+
+ENDINGS_AR_FILE = Path(__file__).parent / "data" / "endings_ar.json"
 
 PASSING_SCORE = 600
 
@@ -33,20 +36,65 @@ def determine_fate(scoring):
     return fate_id
 
 
-def display_ending(fate_id):
-    endings = load_endings()
+
+def get_fate_title(fate_id, loc=None):
+    if loc is None:
+        loc = Localization("en")
+
+    file_path = (
+        ENDINGS_AR_FILE
+        if loc.language == "ar"
+        else ENDINGS_FILE
+    )
+
+    with file_path.open("r", encoding="utf-8") as file:
+        endings = json.load(file)
+
+    for category in endings.values():
+        if fate_id in category:
+            return category[fate_id]["title"]
+
+    return fate_id
+
+
+def display_ending(fate_id, loc=None):
+    if loc is None:
+        loc = Localization("en")
+
+    file_path = (
+        ENDINGS_AR_FILE
+        if loc.language == "ar"
+        else ENDINGS_FILE
+    )
+
+    with file_path.open("r", encoding="utf-8") as file:
+        endings = json.load(file)
 
     for category in endings.values():
         if fate_id in category:
             fate = category[fate_id]
 
             print("\n" + "=" * 50)
-            print(f"               {fate['title']}")
+            print(loc.format_arabic(fate["title"]))
             print("=" * 50)
 
-            print(f"\n{fate['description']}")
-            print("\nThe forest remembers your journey.")
+            print(
+                f"\n{loc.format_arabic(fate['description'])}"
+            )
 
+            message = (
+                "الغابة تتذكر رحلتك."
+                if loc.language == "ar"
+                else "The forest remembers your journey."
+            )
+
+            print(f"\n{loc.format_arabic(message)}")
             return
 
-    print("\nUnknown fate.")
+    message = (
+        "مصير غير معروف."
+        if loc.language == "ar"
+        else "Unknown fate."
+    )
+    print(f"\n{loc.format_arabic(message)}")
+

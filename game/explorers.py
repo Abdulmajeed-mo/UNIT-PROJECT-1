@@ -1,10 +1,11 @@
 # أسماء المستكشفين وسجلات رحلاتهم مع الوقت 
 
 import json
+from game.localization import Localization
 from pathlib import Path
 from datetime import datetime
 from time import monotonic
-
+from game.endings import get_fate_title
 
 class Explorer:
     def __init__(self, name):
@@ -63,7 +64,11 @@ def load_explorer_records():
         return None
 
 
-def save_explorer_record(explorer, score, fate_id):
+
+def save_explorer_record(explorer, score, fate_id, loc=None):
+    if loc is None:
+        loc = Localization("en")
+
     records = load_explorer_records()
 
     if records is None:
@@ -104,7 +109,13 @@ def save_explorer_record(explorer, score, fate_id):
 
         temporary_file.replace(RECORDS_FILE)
 
-        print("\nYour journey has been recorded in the Hall!")
+        message = (
+            "تم تسجيل رحلتك في قاعة المستكشفين!"
+            if loc.language == "ar"
+            else "Your journey has been recorded in the Hall!"
+        )
+
+        print(f"\n{loc.format_arabic(message)}")
         return True
 
     except OSError as error:
@@ -112,24 +123,56 @@ def save_explorer_record(explorer, score, fate_id):
         return False
 
 
-def display_hall():
+def display_hall(loc=None):
+    if loc is None:
+        loc = Localization("en")
+
     records = load_explorer_records()
 
+    def show(english, arabic):
+        text = arabic if loc.language == "ar" else english
+        return loc.format_arabic(text)
+
     print("\n" + "=" * 60)
-    print("              HALL OF LOST EXPLORERS")
+    print(show(
+        "HALL OF LOST EXPLORERS",
+        "قاعة المستكشفين المفقودين"
+    ))
     print("=" * 60)
 
     if not records:
-        print("No explorer journeys recorded yet.")
+        print(show(
+            "No explorer journeys recorded yet.",
+            "لم تُسجل أي رحلات بعد."
+        ))
         return
 
     for rank, record in enumerate(records, start=1):
-        minutes, seconds = divmod(record["duration_seconds"], 60)
+        duration = int(record["duration_seconds"])
+        hours, remainder = divmod(duration, 3600)
+        minutes, seconds = divmod(remainder, 60)
 
-        print(f"\n{rank}. {record['name']}")
-        print(f"   Score: {record['score']}/1000")
-        print(f"   Time: {minutes:02}:{seconds:02}")
-        print(f"   Date: {record['started_at']}")
-        print(f"   Fate: {record['fate']}")
+        name = loc.format_arabic(record["name"])
+
+        print(f"\n{rank}. {name}")
+        print(
+            f"   {show('Score', 'النقاط')}: "
+            f"{record['score']}/1000"
+        )
+        print(
+            f"   {show('Time', 'المدة')}: "
+            f"{hours:02}:{minutes:02}:{seconds:02}"
+        )
+        print(
+            f"   {show('Date', 'التاريخ')}: "
+            f"{record['started_at']}"
+        )
+        
+        fate_title = get_fate_title(record["fate"], loc)
+
+        print(
+            f"   {show('Fate', 'المصير')}: "
+            f"{loc.format_arabic(fate_title)}"
+        )
 
     print("\n" + "=" * 60)

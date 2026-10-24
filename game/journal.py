@@ -2,47 +2,80 @@
 
 
 # Tracks evidence, solved puzzles, and discoveries.
+# Journal data and translations are stored in JSON files.
+
+import json
+from pathlib import Path
+
+from game.localization import Localization
+
+
+DATA_DIR = Path(__file__).parent / "data"
+JOURNAL_FILE = DATA_DIR / "journal.json"
+JOURNAL_AR_FILE = DATA_DIR / "journal_ar.json"
+
+
+def load_journal_data(file_path):
+    with file_path.open("r", encoding="utf-8") as file:
+        return json.load(file)
 
 
 class Journal:
-    CONNECTIONS = {
-        "forest_memory": {
-            "requires": [
-                "The forest remembers every visitor.",
-                "The forest uses voices to mislead travelers."
-            ],
-            "title": "The Forest Remembers",
-            "description": "The forest remembers explorers and uses their memories to guide or mislead them."
-        },
-        "hidden_trials": {
-            "requires": [
-                "The forgotten chronicle contains the forest's truth.",
-                "The forest conceals its purpose behind trials."
-            ],
-            "title": "The Hidden Trials",
-            "description": "The forest's challenges are deliberate tests, not random obstacles."
-        },
-        "ancient_symbols": {
-            "requires": [
-                "The moon comes before the sun.",
-                "The correct symbol order is Moon, Sun, Root."
-            ],
-            "title": "The Ancient Order",
-            "description": "The symbols reveal a meaningful sequence that unlocks the forest's secrets."
-        }
-    }
+    def __init__(self, loc=None):
+        self.loc = loc if loc is not None else Localization("en")
 
-    def __init__(self):
+        self.data = load_journal_data(JOURNAL_FILE)
+        self.arabic_data = load_journal_data(JOURNAL_AR_FILE)
+
+        self.connections = self.data["connections"]
+
         self.evidence = []
         self.solved_puzzles = []
         self.discoveries = []
+
+    def show_text(self, english, arabic):
+        text = arabic if self.loc.language == "ar" else english
+        return self.loc.format_arabic(text)
+
+    def translate_evidence(self, evidence):
+        if self.loc.language == "ar":
+            text = self.arabic_data["evidence"].get(
+                evidence, evidence
+            )
+        else:
+            text = evidence
+
+        return self.loc.format_arabic(text)
+
+    def discovery_text(self, discovery_id, field):
+        if self.loc.language == "ar":
+            translation = self.arabic_data["connections"].get(
+                discovery_id, {}
+            )
+
+            text = translation.get(
+                field,
+                self.connections[discovery_id][field]
+            )
+        else:
+            text = self.connections[discovery_id][field]
+
+        return self.loc.format_arabic(text)
 
     def add_evidence(self, evidence):
         if not evidence or evidence in self.evidence:
             return False
 
+        # Keep original evidence for discovering connections.
         self.evidence.append(evidence)
-        print(f"\nEvidence added to your journal: {evidence}")
+
+        label = self.show_text(
+            "Evidence added to your journal:",
+            "تمت إضافة دليل إلى دفتر الرحلة:"
+        )
+
+        print(f"\n{label} {self.translate_evidence(evidence)}")
+
         self.check_connections()
         return True
 
@@ -56,7 +89,7 @@ class Journal:
         return True
 
     def check_connections(self):
-        for connection_id, connection in self.CONNECTIONS.items():
+        for connection_id, connection in self.connections.items():
             if connection_id in self.discoveries:
                 continue
 
@@ -65,40 +98,91 @@ class Journal:
                 for clue in connection["requires"]
             ):
                 self.discoveries.append(connection_id)
-                print(f"\nNEW DISCOVERY: {connection['title']}")
-                print(connection["description"])
+
+                label = self.show_text(
+                    "NEW DISCOVERY:",
+                    "اكتشاف جديد:"
+                )
+
+                title = self.discovery_text(connection_id, "title")
+                description = self.discovery_text(
+                    connection_id, "description"
+                )
+
+                print(f"\n{label} {title}")
+                print(description)
 
     def display(self):
         print("\n" + "=" * 45)
-        print("             YOUR JOURNAL")
+        print(self.show_text("YOUR JOURNAL", "دفتر رحلتك"))
         print("=" * 45)
 
-        print("\nDiscovered Evidence:")
+        print(
+            "\n" + self.show_text(
+                "Discovered Evidence:",
+                "الأدلة المكتشفة:"
+            )
+        )
+
         if self.evidence:
             for index, evidence in enumerate(self.evidence, start=1):
-                print(f"{index}. {evidence}")
+                print(
+                    f"{index}. {self.translate_evidence(evidence)}"
+                )
         else:
-            print("No evidence discovered yet.")
+            print(
+                self.show_text(
+                    "No evidence discovered yet.",
+                    "لم تكتشف أي أدلة بعد."
+                )
+            )
 
-        puzzle_names = {
-            "1": "The First Riddle",
-            "2": "The Rune Equation",
-            "3": "The Three Forgotten Symbols",
-            "4": "The Missing Chronicle",
-        }
+        print(
+            "\n" + self.show_text(
+                "Solved Puzzles:",
+                "الألغاز المحلولة:"
+            )
+        )
 
-        print("\nSolved Puzzles:")
+        puzzle_names = self.data["puzzle_names"]
+
+        if self.loc.language == "ar":
+            puzzle_names = self.arabic_data["puzzle_names"]
+
         if self.solved_puzzles:
             for puzzle_id in self.solved_puzzles:
-                print(f"- {puzzle_names.get(str(puzzle_id), 'Unknown Puzzle')}")
+                name = puzzle_names.get(
+                    str(puzzle_id), "Unknown Puzzle"
+                )
+                print(f"- {self.loc.format_arabic(name)}")
         else:
-            print("No puzzles solved yet.")
+            print(
+                self.show_text(
+                    "No puzzles solved yet.",
+                    "لم تحل أي ألغاز بعد."
+                )
+            )
 
-        print("\nDiscoveries:")
+        print(
+            "\n" + self.show_text(
+                "Discoveries:",
+                "الاكتشافات:"
+            )
+        )
+
         if self.discoveries:
             for discovery_id in self.discoveries:
-                print(f"- {self.CONNECTIONS[discovery_id]['title']}")
+                if discovery_id in self.connections:
+                    title = self.discovery_text(
+                        discovery_id, "title"
+                    )
+                    print(f"- {title}")
         else:
-            print("No discoveries unlocked yet.")
+            print(
+                self.show_text(
+                    "No discoveries unlocked yet.",
+                    "لم تفتح أي اكتشافات بعد."
+                )
+            )
 
         print("=" * 45)

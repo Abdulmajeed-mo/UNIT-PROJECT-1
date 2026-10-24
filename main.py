@@ -1,7 +1,5 @@
 # نقطة تشغيل اللعبة
 
-
-
 from ui.interface import show_main_menu
 
 
