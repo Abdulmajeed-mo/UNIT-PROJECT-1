@@ -579,7 +579,15 @@ def run_game(saved_state=None, language="ar"):
                         "\nتستكشف المكان وتكشف أسراره."
                     )
                 )
-
+            if location.get("optional", False):
+                if scoring.add_points("secrets", location_id, 50):
+                    print(
+                        game_text(
+                            loc,
+                            "\n+50 Secret Points!",
+                            "\n+50 نقطة للأسرار!"
+                        )
+                    )
             exploration.complete_location(location_id)
 
             print(

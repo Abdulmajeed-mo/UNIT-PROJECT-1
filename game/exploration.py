@@ -1,12 +1,11 @@
 # التنقل بين المواقع وشروط فتحها
 
 import json
-
 from pathlib import Path
-from game.localization import Localization
 
 LOCATIONS_FILE = Path(__file__).parent / "data" / "locations.json"
 LOCATIONS_AR_FILE = Path(__file__).parent / "data" / "locations_ar.json"
+
 
 def load_locations():
     with LOCATIONS_FILE.open("r", encoding="utf-8") as file:
@@ -17,8 +16,8 @@ def load_locations():
 
 class Exploration:
     def __init__(self):
-
         self.regions = load_locations()
+
         with LOCATIONS_AR_FILE.open("r", encoding="utf-8") as file:
             arabic_regions = json.load(file)["regions"]
 
@@ -30,17 +29,18 @@ class Exploration:
                 if item["id"] == region["id"]
             )
 
-        self.arabic_texts[original_region["name"]] = region["name"]
-        self.arabic_texts[original_region["description"]] = region["description"]
+            self.arabic_texts[original_region["name"]] = region["name"]
+            self.arabic_texts[original_region["description"]] = region["description"]
 
-        for location in region["locations"]:
-            original_location = next(
-                item for item in original_region["locations"]
-                if item["id"] == location["id"]
-            )
+            for location in region["locations"]:
+                original_location = next(
+                    item for item in original_region["locations"]
+                    if item["id"] == location["id"]
+                )
 
-            self.arabic_texts[original_location["name"]] = location["name"]
-            self.arabic_texts[original_location["description"]] = location["description"]
+                self.arabic_texts[original_location["name"]] = location["name"]
+                self.arabic_texts[original_location["description"]] = location["description"]
+
         self.current_region = 0
         self.visited_locations = set()
         self.completed_locations = set()
@@ -59,7 +59,6 @@ class Exploration:
             for required in requirements
         )
 
-    
     def translate_location(self, text, loc):
         if loc.language == "ar":
             text = self.arabic_texts.get(text, text)
@@ -74,12 +73,9 @@ class Exploration:
         print("=" * 45)
 
         print(self.translate_location(region["description"], loc))
-
         print(f"\n{loc.display_text('available_locations')}:")
 
-        for index, location in enumerate(
-            self.get_locations(), start=1
-        ):
+        for index, location in enumerate(self.get_locations(), start=1):
             if location["id"] in self.completed_locations:
                 status = loc.display_text("completed")
             elif self.is_unlocked(location):
@@ -100,11 +96,12 @@ class Exploration:
         location = locations[location_number - 1]
 
         if not self.is_unlocked(location):
-            print(
-                loc.format_arabic("هذا الموقع لا يزال مغلقًا.")
+            message = (
+                "هذا الموقع لا يزال مغلقًا."
                 if loc.language == "ar"
                 else "This location is locked."
             )
+            print(loc.format_arabic(message))
             return None
 
         self.visited_locations.add(location["id"])
@@ -150,17 +147,10 @@ class Exploration:
         name = self.translate_location(
             self.get_current_region()["name"], loc
         )
-
         print(f"\n{name}")
-        return True
 
+        return True
 
     def complete_location(self, location_id):
         self.visited_locations.add(location_id)
         self.completed_locations.add(location_id)
-
-    
-
-    
-
-

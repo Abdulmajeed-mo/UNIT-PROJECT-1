@@ -1,89 +1,108 @@
 {
     "version": 1,
     "game_state": {
+        "language": "ar",
         "explorer": {
-            "name": "Abdulmajeed",
-            "started_at": "2026-10-22T12:30:42",
-            "playtime_seconds": 76
+            "name": "أحمد",
+            "started_at": "2026-10-24T15:12:53",
+            "playtime_seconds": 34
         },
         "exploration": {
             "current_region": 0,
             "visited_locations": [
+                "forgotten_shrine",
+                "whispering_roots",
                 "ancient_gate",
-                "forgotten_shrine"
+                "watchers_camp"
             ],
             "completed_locations": [
+                "forgotten_shrine",
+                "whispering_roots",
                 "ancient_gate",
-                "forgotten_shrine"
+                "watchers_camp"
             ]
         },
         "journal": {
             "evidence": [
-                "Observe before you act."
+                "A faded moon symbol marks the entrance.",
+                "The forgotten chronicle contains the forest's truth.",
+                "The first riddle reveals that knowledge opens hidden paths."
             ],
-            "solved_puzzles": [],
+            "solved_puzzles": [
+                "1"
+            ],
             "discoveries": []
         },
         "scoring": {
             "scores": {
-                "puzzles": 0,
-                "evidence": 25,
-                "decisions": 40,
-                "secrets": 0
+                "puzzles": 100,
+                "evidence": 75,
+                "decisions": 80,
+                "secrets": 50
             },
             "rewarded_actions": [
-                "evidence:Observe before you act.",
-                "decisions:event_1"
+                "secrets:forgotten_shrine",
+                "evidence:A faded moon symbol marks the entrance.",
+                "evidence:The forgotten chronicle contains the forest's truth.",
+                "puzzles:1",
+                "decisions:event_2",
+                "decisions:event_1",
+                "evidence:The first riddle reveals that knowledge opens hidden paths."
             ]
         },
         "selected_puzzles": {
             "1": {
-                "question": "I have many rings but no fingers. What am I?",
+                "question": "I have keys but open no locks. I have space but contain no rooms. What am I?",
                 "options": [
-                    "A bell",
-                    "A tree",
-                    "A crown",
-                    "A necklace"
+                    "A map",
+                    "A keyboard",
+                    "A forest",
+                    "A mirror"
                 ],
                 "correct": 2,
-                "hint": "My rings reveal my age."
+                "hint": "Think of something you use to type.",
+                "question_index": 0
             },
             "2": {
-                "question": "A stone sequence reads: 3, 6, 12, 24. What comes next?",
+                "question": "Four glowing runes each hold 6 units of energy. What is their total energy?",
                 "options": [
-                    "30",
-                    "36",
-                    "42",
-                    "48"
+                    "18",
+                    "20",
+                    "24",
+                    "30"
                 ],
-                "correct": 4,
-                "hint": "Each number is twice the previous one."
+                "correct": 3,
+                "hint": "Multiply the number of runes by their energy.",
+                "question_index": 1
             },
             "3": {
-                "question": "The root must be first. The moon follows the root. The sun comes last. Choose the order.",
+                "question": "The moon must be last. The root comes before the sun. Choose the order.",
                 "options": [
-                    "Moon, Root, Sun",
-                    "Root, Moon, Sun",
                     "Sun, Root, Moon",
+                    "Moon, Sun, Root",
+                    "Root, Moon, Sun",
                     "Root, Sun, Moon"
                 ],
-                "correct": 2,
-                "hint": "Begin with the root and end with the sun."
+                "correct": 4,
+                "hint": "Start with the root and finish with the moon.",
+                "question_index": 3
             },
             "4": {
-                "question": "What truth does the forgotten chronicle reveal?",
+                "question": "The final chronicle reveals that the forest remembers every visitor. What is its greatest lesson?",
                 "options": [
-                    "The forest protects a hidden kingdom.",
-                    "The forest remembers those who enter.",
-                    "The forest has no purpose.",
-                    "The forest is only an illusion."
+                    "Escape requires luck alone.",
+                    "Knowledge and choices shape your fate.",
+                    "The forest rewards every explorer equally.",
+                    "The ancient symbols are meaningless."
                 ],
                 "correct": 2,
-                "hint": "Remember the warning at the Silent Gate."
+                "hint": "Combine what you learned from the puzzles and your decisions.",
+                "question_index": 4
             }
         },
         "previous_choices": {
-            "1": 3
+            "1": 2,
+            "2": 1
         }
     }
 }
