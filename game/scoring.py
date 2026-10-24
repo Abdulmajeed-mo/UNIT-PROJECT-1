@@ -1,7 +1,18 @@
-
 # Manages explorer scores and prevents duplicate rewards.
 
+from rich.panel import Panel
+from rich.table import Table
+from rich.progress_bar import ProgressBar
+from rich.console import Group
+from rich.text import Text
+
 from game.localization import Localization
+from ui.effects import console
+
+
+FOREST_GREEN = "#2F5249"
+ANTIQUE_GOLD = "#C5A46D"
+SOFT_GREEN = "#A3B18A"
 
 
 class Scoring:
@@ -17,6 +28,13 @@ class Scoring:
         "evidence": "الأدلة",
         "decisions": "القرارات",
         "secrets": "الأسرار",
+    }
+
+    CATEGORY_ICONS = {
+        "puzzles": "🔮",
+        "evidence": "📜",
+        "decisions": "⚖️",
+        "secrets": "✨",
     }
 
     def __init__(self, loc=None):
@@ -57,15 +75,21 @@ class Scoring:
         return sum(self.scores.values())
 
     def display_score(self):
-        print("\n" + "=" * 45)
-
         title = (
-            "نقاط المستكشف"
+            "🏆 نقاط المستكشف"
             if self.loc.language == "ar"
-            else "EXPLORER SCORE"
+            else "🏆 EXPLORER SCORE"
         )
-        print(self.loc.format_arabic(title))
-        print("=" * 45)
+
+        table = Table(
+            show_header=False,
+            show_edge=False,
+            box=None,
+            padding=(0, 2),
+        )
+
+        table.add_column(style=SOFT_GREEN)
+        table.add_column(style=ANTIQUE_GOLD, justify="right")
 
         for category, score in self.scores.items():
             maximum = self.MAX_SCORES[category]
@@ -76,12 +100,15 @@ class Scoring:
                 else category.title()
             )
 
-            print(
-                f"{self.loc.format_arabic(name)}: "
-                f"{score}/{maximum}"
+            label = (
+                f"{self.CATEGORY_ICONS[category]} "
+                f"{self.loc.format_arabic(name)}"
             )
 
-        print("-" * 45)
+            table.add_row(label, f"{score}/{maximum}")
+
+        total = self.get_total()
+        maximum_total = sum(self.MAX_SCORES.values())
 
         total_label = (
             "المجموع"
@@ -89,7 +116,31 @@ class Scoring:
             else "TOTAL"
         )
 
-        print(
-            f"{self.loc.format_arabic(total_label)}: "
-            f"{self.get_total()}/1000"
+        total_text = Text()
+        total_text.append(
+            f"\n{self.loc.format_arabic(total_label)}: ",
+            style=SOFT_GREEN,
+        )
+        total_text.append(
+            f"{total}/{maximum_total}",
+            style=f"bold {ANTIQUE_GOLD}",
+        )
+
+        progress = ProgressBar(
+            total=maximum_total,
+            completed=total,
+            width=35,
+            complete_style=SOFT_GREEN,
+            finished_style=ANTIQUE_GOLD,
+        )
+
+        console.print()
+        console.print(
+            Panel(
+                Group(table, total_text, progress),
+                title=self.loc.format_arabic(title),
+                border_style=FOREST_GREEN,
+                padding=(1, 2),
+                expand=False,
+            )
         )

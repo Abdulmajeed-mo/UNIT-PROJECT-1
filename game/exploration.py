@@ -1,10 +1,22 @@
 # التنقل بين المواقع وشروط فتحها
+# Exploration system with Fantasy Forest Rich styling.
 
 import json
 from pathlib import Path
 
+from rich.panel import Panel
+from rich.text import Text
+
+from ui.effects import console
+
+
 LOCATIONS_FILE = Path(__file__).parent / "data" / "locations.json"
 LOCATIONS_AR_FILE = Path(__file__).parent / "data" / "locations_ar.json"
+
+FOREST_GREEN = "#2F5249"
+ANTIQUE_GOLD = "#C5A46D"
+SOFT_GREEN = "#A3B18A"
+LOCKED_GRAY = "#858585"
 
 
 def load_locations():
@@ -30,7 +42,9 @@ class Exploration:
             )
 
             self.arabic_texts[original_region["name"]] = region["name"]
-            self.arabic_texts[original_region["description"]] = region["description"]
+            self.arabic_texts[original_region["description"]] = (
+                region["description"]
+            )
 
             for location in region["locations"]:
                 original_location = next(
@@ -38,8 +52,12 @@ class Exploration:
                     if item["id"] == location["id"]
                 )
 
-                self.arabic_texts[original_location["name"]] = location["name"]
-                self.arabic_texts[original_location["description"]] = location["description"]
+                self.arabic_texts[original_location["name"]] = (
+                    location["name"]
+                )
+                self.arabic_texts[original_location["description"]] = (
+                    location["description"]
+                )
 
         self.current_region = 0
         self.visited_locations = set()
@@ -68,29 +86,66 @@ class Exploration:
     def show_locations(self, loc):
         region = self.get_current_region()
 
-        print("\n" + "=" * 45)
-        print(self.translate_location(region["name"], loc))
-        print("=" * 45)
+        region_name = self.translate_location(region["name"], loc)
+        region_description = self.translate_location(
+            region["description"], loc
+        )
 
-        print(self.translate_location(region["description"], loc))
-        print(f"\n{loc.display_text('available_locations')}:")
+        console.print()
+
+        console.print(
+            Panel(
+                Text(region_description, style=SOFT_GREEN),
+                title=f"🌳 {region_name}",
+                title_align="center",
+                border_style=FOREST_GREEN,
+                padding=(1, 2),
+                expand=False,
+            )
+        )
+
+        console.print(
+            Text(
+                f"\n🧭 {loc.display_text('available_locations')}:",
+                style=ANTIQUE_GOLD,
+            )
+        )
 
         for index, location in enumerate(self.get_locations(), start=1):
             if location["id"] in self.completed_locations:
+                icon = "✅"
+                status_color = ANTIQUE_GOLD
                 status = loc.display_text("completed")
+
             elif self.is_unlocked(location):
+                icon = "🔓"
+                status_color = SOFT_GREEN
                 status = loc.display_text("available")
+
             else:
+                icon = "🔒"
+                status_color = LOCKED_GRAY
                 status = loc.display_text("locked")
 
             name = self.translate_location(location["name"], loc)
-            print(f"{index}. {name} [{status}]")
+
+            line = Text()
+            line.append(f"{index}. {icon} ")
+            line.append(name, style=status_color)
+            line.append(f" [{status}]", style=LOCKED_GRAY)
+
+            console.print(line)
 
     def visit_location(self, location_number, loc):
         locations = self.get_locations()
 
         if not 1 <= location_number <= len(locations):
-            print(loc.display_text("invalid_option"))
+            console.print(
+                Text(
+                    loc.display_text("invalid_option"),
+                    style="red",
+                )
+            )
             return None
 
         location = locations[location_number - 1]
@@ -101,14 +156,29 @@ class Exploration:
                 if loc.language == "ar"
                 else "This location is locked."
             )
-            print(loc.format_arabic(message))
+
+            console.print(
+                Text(loc.format_arabic(message), style="red")
+            )
             return None
 
         self.visited_locations.add(location["id"])
 
         name = self.translate_location(location["name"], loc)
-        print(f"\n--- {name} ---")
-        print(self.translate_location(location["description"], loc))
+        description = self.translate_location(
+            location["description"], loc
+        )
+
+        console.print()
+        console.print(
+            Panel(
+                Text(description, style=SOFT_GREEN),
+                title=f"✨ {name}",
+                border_style=ANTIQUE_GOLD,
+                padding=(1, 2),
+                expand=False,
+            )
+        )
 
         return location
 
@@ -130,7 +200,10 @@ class Exploration:
                 if loc.language == "ar"
                 else "Complete all main locations before leaving this region."
             )
-            print(loc.format_arabic(message))
+
+            console.print(
+                Text(loc.format_arabic(message), style="red")
+            )
             return False
 
         if self.current_region + 1 >= len(self.regions):
@@ -139,7 +212,10 @@ class Exploration:
                 if loc.language == "ar"
                 else "You have reached the final region."
             )
-            print(loc.format_arabic(message))
+
+            console.print(
+                Text(loc.format_arabic(message), style=ANTIQUE_GOLD)
+            )
             return False
 
         self.current_region += 1
@@ -147,7 +223,14 @@ class Exploration:
         name = self.translate_location(
             self.get_current_region()["name"], loc
         )
-        print(f"\n{name}")
+
+        console.print(
+            Panel(
+                Text(f"🌲 {name}", style=ANTIQUE_GOLD),
+                border_style=FOREST_GREEN,
+                expand=False,
+            )
+        )
 
         return True
 

@@ -1,18 +1,27 @@
 # يسجل الأدلة التي اكتشفها اللاعب
 
-
 # Tracks evidence, solved puzzles, and discoveries.
 # Journal data and translations are stored in JSON files.
 
 import json
 from pathlib import Path
 
+from rich.console import Group
+from rich.panel import Panel
+from rich.text import Text
+
 from game.localization import Localization
+from ui.effects import console
 
 
 DATA_DIR = Path(__file__).parent / "data"
 JOURNAL_FILE = DATA_DIR / "journal.json"
 JOURNAL_AR_FILE = DATA_DIR / "journal_ar.json"
+
+FOREST_GREEN = "#2F5249"
+ANTIQUE_GOLD = "#C5A46D"
+SOFT_GREEN = "#A3B18A"
+MUTED_GRAY = "#858585"
 
 
 def load_journal_data(file_path):
@@ -52,7 +61,6 @@ class Journal:
             translation = self.arabic_data["connections"].get(
                 discovery_id, {}
             )
-
             text = translation.get(
                 field,
                 self.connections[discovery_id][field]
@@ -66,7 +74,7 @@ class Journal:
         if not evidence or evidence in self.evidence:
             return False
 
-        # Keep original evidence for discovering connections.
+        # Preserve English evidence IDs for connection checks.
         self.evidence.append(evidence)
 
         label = self.show_text(
@@ -74,7 +82,18 @@ class Journal:
             "تمت إضافة دليل إلى دفتر الرحلة:"
         )
 
-        print(f"\n{label} {self.translate_evidence(evidence)}")
+        console.print(
+            Panel(
+                Text(
+                    f"{label}\n{self.translate_evidence(evidence)}",
+                    style=SOFT_GREEN,
+                ),
+                title="📜 ✦ EVIDENCE ✦",
+                border_style=FOREST_GREEN,
+                padding=(0, 2),
+                expand=False,
+            )
+        )
 
         self.check_connections()
         return True
@@ -109,80 +128,152 @@ class Journal:
                     connection_id, "description"
                 )
 
-                print(f"\n{label} {title}")
-                print(description)
+                content = Group(
+                    Text(f"✨ {label}", style=ANTIQUE_GOLD),
+                    Text(title, style=ANTIQUE_GOLD),
+                    Text(description, style=SOFT_GREEN),
+                )
+
+                console.print(
+                    Panel(
+                        content,
+                        title="🔮 ✦ FOREST MEMORY ✦",
+                        border_style=ANTIQUE_GOLD,
+                        padding=(1, 2),
+                        expand=False,
+                    )
+                )
 
     def display(self):
-        print("\n" + "=" * 45)
-        print(self.show_text("YOUR JOURNAL", "دفتر رحلتك"))
-        print("=" * 45)
+        title = self.show_text(
+            "YOUR JOURNAL",
+            "دفتر رحلتك"
+        )
 
-        print(
-            "\n" + self.show_text(
-                "Discovered Evidence:",
-                "الأدلة المكتشفة:"
+        console.print()
+        console.print(
+            Panel(
+                Text(
+                    f"📜 ✦ {title} ✦",
+                    style=f"bold {ANTIQUE_GOLD}",
+                ),
+                border_style=FOREST_GREEN,
+                padding=(0, 2),
+                expand=False,
             )
         )
+
+        # Discovered evidence
+        evidence_lines = Text()
 
         if self.evidence:
             for index, evidence in enumerate(self.evidence, start=1):
-                print(
-                    f"{index}. {self.translate_evidence(evidence)}"
+                evidence_lines.append(
+                    f"{index}. {self.translate_evidence(evidence)}\n",
+                    style=SOFT_GREEN,
                 )
         else:
-            print(
+            evidence_lines.append(
                 self.show_text(
                     "No evidence discovered yet.",
                     "لم تكتشف أي أدلة بعد."
-                )
+                ),
+                style=MUTED_GRAY,
             )
 
-        print(
-            "\n" + self.show_text(
-                "Solved Puzzles:",
-                "الألغاز المحلولة:"
+        evidence_title = self.show_text(
+            "DISCOVERED EVIDENCE",
+            "الأدلة المكتشفة"
+        )
+
+        console.print(
+            Panel(
+                evidence_lines,
+                title=f"📜 {evidence_title}",
+                border_style=FOREST_GREEN,
+                padding=(0, 2),
+                expand=False,
             )
         )
 
-        puzzle_names = self.data["puzzle_names"]
+        # Solved puzzles
+        puzzle_lines = Text()
 
-        if self.loc.language == "ar":
-            puzzle_names = self.arabic_data["puzzle_names"]
+        puzzle_names = (
+            self.arabic_data["puzzle_names"]
+            if self.loc.language == "ar"
+            else self.data["puzzle_names"]
+        )
 
         if self.solved_puzzles:
             for puzzle_id in self.solved_puzzles:
                 name = puzzle_names.get(
-                    str(puzzle_id), "Unknown Puzzle"
+                    str(puzzle_id),
+                    "Unknown Puzzle"
                 )
-                print(f"- {self.loc.format_arabic(name)}")
+
+                puzzle_lines.append(
+                    f"🔮 {self.loc.format_arabic(name)}\n",
+                    style=ANTIQUE_GOLD,
+                )
         else:
-            print(
+            puzzle_lines.append(
                 self.show_text(
                     "No puzzles solved yet.",
                     "لم تحل أي ألغاز بعد."
-                )
+                ),
+                style=MUTED_GRAY,
             )
 
-        print(
-            "\n" + self.show_text(
-                "Discoveries:",
-                "الاكتشافات:"
+        puzzles_title = self.show_text(
+            "SOLVED PUZZLES",
+            "الألغاز المحلولة"
+        )
+
+        console.print(
+            Panel(
+                puzzle_lines,
+                title=f"🔮 {puzzles_title}",
+                border_style=ANTIQUE_GOLD,
+                padding=(0, 2),
+                expand=False,
             )
         )
+
+        # Discoveries
+        discovery_lines = Text()
 
         if self.discoveries:
             for discovery_id in self.discoveries:
                 if discovery_id in self.connections:
-                    title = self.discovery_text(
+                    name = self.discovery_text(
                         discovery_id, "title"
                     )
-                    print(f"- {title}")
+
+                    discovery_lines.append(
+                        f"✨ {name}\n",
+                        style=ANTIQUE_GOLD,
+                    )
         else:
-            print(
+            discovery_lines.append(
                 self.show_text(
                     "No discoveries unlocked yet.",
                     "لم تفتح أي اكتشافات بعد."
-                )
+                ),
+                style=MUTED_GRAY,
             )
 
-        print("=" * 45)
+        discoveries_title = self.show_text(
+            "DISCOVERIES",
+            "الاكتشافات"
+        )
+
+        console.print(
+            Panel(
+                discovery_lines,
+                title=f"✨ {discoveries_title}",
+                border_style=FOREST_GREEN,
+                padding=(0, 2),
+                expand=False,
+            )
+        )

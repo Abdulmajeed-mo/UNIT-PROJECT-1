@@ -1,11 +1,11 @@
 # يحتوي الألغاز والإجابات والتلميحات
-
-
 # Handles randomized puzzles, answers, hints, and localization.
 
 import json
 import random
 from pathlib import Path
+
+import questionary
 
 from game.localization import Localization
 
@@ -13,6 +13,13 @@ from game.localization import Localization
 DATA_DIR = Path(__file__).parent / "data"
 PUZZLES_FILE = DATA_DIR / "puzzles.json"
 PUZZLES_AR_FILE = DATA_DIR / "puzzles_ar.json"
+
+QUESTIONARY_STYLE = questionary.Style([
+    ("pointer", "fg:#C5A46D bold"),
+    ("highlighted", "fg:#A3B18A bold"),
+    ("selected", "fg:#2F5249"),
+    ("question", "fg:#C5A46D"),
+])
 
 
 def load_puzzles():
@@ -31,11 +38,15 @@ def select_random_puzzles():
 
     for puzzle_id, questions in puzzle_bank.items():
         selected_index = random.randrange(len(questions))
-        selected_puzzles[puzzle_id] = questions[selected_index].copy()
 
-        # Save the index so the same question can be translated
-        # even after the player saves and resumes the game.
-        selected_puzzles[puzzle_id]["question_index"] = selected_index
+        selected_puzzles[puzzle_id] = questions[
+            selected_index
+        ].copy()
+
+        # Preserve question index for translation and Save/Load.
+        selected_puzzles[puzzle_id]["question_index"] = (
+            selected_index
+        )
 
     return selected_puzzles
 
@@ -50,22 +61,33 @@ def solve_puzzle(
     puzzle = selected_puzzles.get(puzzle_id)
 
     if puzzle is None:
-        print(f"Error: Puzzle '{puzzle_id}' not found.")
+        message = (
+            "خطأ: لم يتم العثور على اللغز."
+            if loc.language == "ar"
+            else f"Error: Puzzle '{puzzle_id}' not found."
+        )
+        print(loc.format_arabic(message))
         return False
 
     question = puzzle["question"]
     options = puzzle["options"]
     hint = puzzle["hint"]
 
+    # Load the matching Arabic question while preserving
+    # the original correct answer.
     if loc.language == "ar":
         arabic_bank = load_arabic_puzzles()
         question_index = puzzle.get("question_index")
 
-        # Support older save files that have no question_index.
+        # Compatibility with older saved games.
         if question_index is None:
-            original_questions = load_puzzles().get(puzzle_id, [])
+            original_questions = load_puzzles().get(
+                puzzle_id, []
+            )
 
-            for index, original in enumerate(original_questions):
+            for index, original in enumerate(
+                original_questions
+            ):
                 if original["question"] == puzzle["question"]:
                     question_index = index
                     break
@@ -81,23 +103,50 @@ def solve_puzzle(
             options = translated["options"]
             hint = translated["hint"]
 
-    print(f"\n{loc.format_arabic(question)}\n")
-
-    for index, option in enumerate(options, start=1):
-        print(f"{index}. {loc.format_arabic(option)}")
+    print(f"\n🔮 {loc.format_arabic(question)}\n")
 
     while True:
         answer_prompt = (
-            "إجابتك (أو J لفتح دفتر الرحلة):"
+            "اختر إجابتك باستخدام الأسهم:"
             if loc.language == "ar"
-            else "Your answer (or J for Journal):"
+            else "Choose your answer using the arrow keys:"
         )
 
-        answer = input(
-            f"\n{loc.format_arabic(answer_prompt)} "
-        ).strip().lower()
+        choices = [
+            questionary.Choice(
+                title=f"{index}. {loc.format_arabic(option)}",
+                value=index,
+            )
+            for index, option in enumerate(options, start=1)
+        ]
 
-        if answer == "j":
+        journal_label = (
+            "📜 عرض دفتر الرحلة"
+            if loc.language == "ar"
+            else "📜 Review Journal"
+        )
+
+        choices.append(
+            questionary.Choice(
+                title=loc.format_arabic(journal_label),
+                value="journal",
+            )
+        )
+
+        answer = questionary.select(
+            loc.format_arabic(answer_prompt),
+            choices=choices,
+            pointer="❯",
+            style=QUESTIONARY_STYLE,
+            use_shortcuts=False,
+        ).ask()
+
+        # Handle canceled selection.
+        if answer is None:
+            return False
+
+        # Open Journal without leaving the puzzle.
+        if answer == "journal":
             if journal is not None:
                 journal.display()
             else:
@@ -107,47 +156,36 @@ def solve_puzzle(
                     else "Journal is unavailable."
                 )
                 print(loc.format_arabic(message))
+
             continue
 
-        if not answer.isdigit():
+        # Check the original English puzzle's correct index.
+        if answer == puzzle["correct"]:
             message = (
-                "أدخل رقم خيار صحيح."
+                "✨ إجابة صحيحة! تكشف الغابة أحد أسرارها."
                 if loc.language == "ar"
-                else "Please enter a valid option number."
+                else "✨ Correct! The forest reveals its secret."
             )
-            print(loc.format_arabic(message))
-            continue
 
-        choice_number = int(answer)
-
-        if not 1 <= choice_number <= len(options):
-            message = (
-                "خيار غير صحيح، حاول مجددًا."
-                if loc.language == "ar"
-                else "Invalid option. Try again."
-            )
-            print(loc.format_arabic(message))
-            continue
-
-        # Always check the original English puzzle's answer.
-        if choice_number == puzzle["correct"]:
-            message = (
-                "إجابة صحيحة! تكشف الغابة أحد أسرارها."
-                if loc.language == "ar"
-                else "Correct! The forest reveals its secret."
-            )
             print(f"\n{loc.format_arabic(message)}")
             return True
 
-        hint_label = "تلميح" if loc.language == "ar" else "Hint"
+        # Show hint after an incorrect answer.
+        hint_label = (
+            "💡 تلميح"
+            if loc.language == "ar"
+            else "💡 Hint"
+        )
+
         print(
             f"\n{loc.format_arabic(hint_label)}: "
             f"{loc.format_arabic(hint)}"
         )
 
         message = (
-            "إجابة خاطئة، حاول مجددًا."
+            "❌ إجابة خاطئة، حاول مجددًا."
             if loc.language == "ar"
-            else "Incorrect answer. Try again."
+            else "❌ Incorrect answer. Try again."
         )
+
         print(loc.format_arabic(message))
