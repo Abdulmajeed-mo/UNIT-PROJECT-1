@@ -7,9 +7,11 @@ from rich.panel import Panel
 from rich.rule import Rule
 from rich.text import Text
 from rich.theme import Theme
+
 from game.localization import Localization
 
-# Fantasy Forest color palette
+
+
 FOREST_GREEN = "#2F5249"
 ANTIQUE_GOLD = "#C5A46D"
 SOFT_GREEN = "#A3B18A"
@@ -31,8 +33,17 @@ FOREST_THEME = Theme({
 console = Console(theme=FOREST_THEME)
 
 
+
+
+def format_message(message, language="ar"):
+    """Format Arabic text for terminal display."""
+    return Localization(language).format_arabic(str(message))
+
+
+
+
 def show_panel(title, description="", style="forest"):
-    """Display a Fantasy Forest panel."""
+    """Display a fantasy-themed panel."""
 
     content = description if description else title
 
@@ -74,7 +85,7 @@ def show_separator():
 
 
 def show_forest_entry(language="ar"):
-    """Play an atmospheric animation when entering the forest."""
+    """Display the forest entry animation."""
 
     message = (
         "🌲 تستيقظ الغابة القديمة..."
@@ -82,12 +93,14 @@ def show_forest_entry(language="ar"):
         else "🌲 The ancient forest is awakening..."
     )
 
+    formatted_message = format_message(message, language)
+
     with console.status(
-        Text(message, style=SOFT_GREEN),
+        Text(formatted_message, style=SOFT_GREEN),
         spinner="dots",
         spinner_style=ANTIQUE_GOLD,
     ):
-        time.sleep(1.5)
+        time.sleep(5)
 
     console.print(
         Rule("✦ ELDERGROVE ✦", style=FOREST_GREEN)
@@ -95,9 +108,8 @@ def show_forest_entry(language="ar"):
 
 
 
-
 def show_magic_loading(language="ar"):
-    """Display a magical spinner before a puzzle."""
+    """Display a magical loading animation."""
 
     message = (
         "🔮 تتوهج الرموز السحرية..."
@@ -105,20 +117,19 @@ def show_magic_loading(language="ar"):
         else "🔮 Ancient runes are glowing..."
     )
 
+    formatted_message = format_message(message, language)
+
     with console.status(
-        Text(message, style=ANTIQUE_GOLD),
+        Text(formatted_message, style=ANTIQUE_GOLD),
         spinner="moon",
         spinner_style=SOFT_GREEN,
     ):
-        time.sleep(1.2)
-
-
+        time.sleep(5
+        )
 
 
 def show_secret_discovery(language="ar", points=50):
-    """Celebrate finding a hidden secret with Arabic support."""
-
-    loc = Localization(language)
+    """Celebrate discovering a hidden forest secret."""
 
     message = (
         "لقد اكتشفت أحد أسرار الغابة!"
@@ -132,15 +143,13 @@ def show_secret_discovery(language="ar", points=50):
         else f"+{points} Secret Points"
     )
 
-    formatted_message = loc.format_arabic(message)
-    formatted_points = loc.format_arabic(points_message)
-
     content = Text(justify="center")
+
     content.append("✨ ")
-    content.append(formatted_message)
+    content.append(format_message(message, language))
     content.append("\n\n")
     content.append("✦ ")
-    content.append(formatted_points)
+    content.append(format_message(points_message, language))
     content.append(" ✦")
 
     console.print()
@@ -157,19 +166,13 @@ def show_secret_discovery(language="ar", points=50):
 
 
 
-
 def type_narration(
     text,
     delay=0.06,
     style=SOFT_GREEN,
     formatter=None,
 ):
-    """
-    Reveal narration word by word.
-
-    formatter can be loc.format_arabic when
-    displaying Arabic narration.
-    """
+    """Reveal story narration gradually."""
 
     words = str(text).split()
 
@@ -190,20 +193,18 @@ def type_narration(
 
         time.sleep(delay)
 
-    console.print(
-        Text(
-            formatter(str(text))
-            if formatter is not None
-            else str(text),
-            style=style,
-        )
+    final_text = (
+        formatter(str(text))
+        if formatter is not None
+        else str(text)
     )
 
+    console.print(Text(final_text, style=style))
 
-#
+
 
 def show_final_fate(language="ar"):
-    """Play an atmospheric effect before the final ending."""
+    """Display the final fate animation."""
 
     message = (
         "🪄 الغابة تحدد مصيرك..."
@@ -211,14 +212,17 @@ def show_final_fate(language="ar"):
         else "🪄 The forest is deciding your fate..."
     )
 
+    formatted_message = format_message(message, language)
+
     with console.status(
-        Text(message, style=ANTIQUE_GOLD),
+        Text(formatted_message, style=ANTIQUE_GOLD),
         spinner="earth",
         spinner_style=SOFT_GREEN,
     ):
-        time.sleep(2)
+        time.sleep(5)
 
     console.print()
+
     console.print(
         Rule(
             "✦ THE FOREST REMEMBERS ✦",

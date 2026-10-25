@@ -1,20 +1,13 @@
-# تشغيل الأصوات والتحكم بها
-# Eldergrove - Fantasy Audio System
-# Background ambience, sound effects, and audio controls.
-
 from pathlib import Path
 
 import pygame
 
 
-# --------------------------------------------------
-# Audio paths
-# --------------------------------------------------
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 SOUND_DIR = BASE_DIR / "assets" / "sounds"
 
 SOUND_FILES = {
+    "intro": "FantasyIntro",
     "forest": "forest",
     "gate": "gate",
     "success": "success",
@@ -24,29 +17,16 @@ SOUND_FILES = {
 
 SUPPORTED_FORMATS = (".mp3", ".wav", ".ogg")
 
-
-# --------------------------------------------------
-# Audio settings
-# --------------------------------------------------
-
 SOUND_ENABLED = True
-
 MUSIC_VOLUME = 0.25
 EFFECT_VOLUME = 0.65
 
 _audio_ready = False
-_music_playing = False
-
+_current_music = None
 _sound_cache = {}
 
 
-# --------------------------------------------------
-# Initialize audio
-# --------------------------------------------------
-
 def initialize_audio():
-    """Initialize the audio mixer once."""
-
     global _audio_ready
 
     if _audio_ready:
@@ -61,8 +41,8 @@ def initialize_audio():
         )
 
         pygame.mixer.set_num_channels(8)
-
         _audio_ready = True
+
         return True
 
     except pygame.error as error:
@@ -70,13 +50,7 @@ def initialize_audio():
         return False
 
 
-# --------------------------------------------------
-# Find sound files
-# --------------------------------------------------
-
 def get_sound_path(sound_name):
-    """Find a sound file using its name and extension."""
-
     filename = SOUND_FILES.get(sound_name)
 
     if filename is None:
@@ -91,86 +65,60 @@ def get_sound_path(sound_name):
     return None
 
 
-# --------------------------------------------------
-# Background forest ambience
-# --------------------------------------------------
+def play_music(sound_name):
+    global _current_music
 
-def play_forest():
-    """
-    Play forest ambience continuously.
-
-    Background music loops independently
-    from the sound effects.
-    """
-
-    global _music_playing
-
-    if not SOUND_ENABLED:
+    if not SOUND_ENABLED or not initialize_audio():
         return
 
-    if not initialize_audio():
+    if (
+        _current_music == sound_name
+        and pygame.mixer.music.get_busy()
+    ):
         return
 
-    if _music_playing and pygame.mixer.music.get_busy():
-        return
-
-    path = get_sound_path("forest")
+    path = get_sound_path(sound_name)
 
     if path is None:
-        print("Forest audio file not found.")
+        print(f"Music file not found: {sound_name}")
         return
 
     try:
         pygame.mixer.music.load(str(path))
-
         pygame.mixer.music.set_volume(MUSIC_VOLUME)
+        pygame.mixer.music.play(loops=-1, fade_ms=800)
 
-        # -1 means infinite looping.
-        pygame.mixer.music.play(loops=-1, fade_ms=1000)
-
-        _music_playing = True
+        _current_music = sound_name
 
     except pygame.error as error:
-        _music_playing = False
-        print(f"Cannot play forest ambience: {error}")
+        print(f"Cannot play music: {error}")
 
 
-# --------------------------------------------------
-# Stop background ambience
-# --------------------------------------------------
+def play_intro():
+    play_music("intro")
+
+
+def play_forest():
+    play_music("forest")
+
 
 def stop_forest():
-    """Stop the forest ambience."""
-
-    global _music_playing
+    global _current_music
 
     if not _audio_ready:
         return
 
-    pygame.mixer.music.stop()
+    if _current_music == "forest":
+        pygame.mixer.music.stop()
+        _current_music = None
 
-    _music_playing = False
-
-
-# --------------------------------------------------
-# Sound effects
-# --------------------------------------------------
 
 def play_sound(sound_name):
-    """
-    Play a sound effect without interrupting
-    the forest ambience.
-    """
-
-    if not SOUND_ENABLED:
+    if not SOUND_ENABLED or not initialize_audio():
         return
 
-    if not initialize_audio():
-        return
-
-    # Forest ambience has its own music channel.
-    if sound_name == "forest":
-        play_forest()
+    if sound_name in ("intro", "forest"):
+        play_music(sound_name)
         return
 
     path = get_sound_path(sound_name)
@@ -186,22 +134,14 @@ def play_sound(sound_name):
             )
 
         sound = _sound_cache[sound_name]
-
         sound.set_volume(EFFECT_VOLUME)
-
         sound.play()
 
     except pygame.error as error:
         print(f"Cannot play sound '{sound_name}': {error}")
 
 
-# --------------------------------------------------
-# Sound enable / disable
-# --------------------------------------------------
-
 def toggle_sound():
-    """Enable or mute all audio."""
-
     global SOUND_ENABLED
 
     SOUND_ENABLED = not SOUND_ENABLED
@@ -210,10 +150,8 @@ def toggle_sound():
         return SOUND_ENABLED
 
     if SOUND_ENABLED:
-        # Resume ambience only if it was playing.
-        if _music_playing:
+        if _current_music is not None:
             pygame.mixer.music.unpause()
-
     else:
         pygame.mixer.music.pause()
         pygame.mixer.stop()
@@ -221,36 +159,22 @@ def toggle_sound():
     return SOUND_ENABLED
 
 
-# --------------------------------------------------
-# Audio status
-# --------------------------------------------------
-
 def is_sound_enabled():
-    """Return whether sound is enabled."""
-
     return SOUND_ENABLED
 
 
-# --------------------------------------------------
-# Stop everything
-# --------------------------------------------------
-
 def stop_all_audio():
-    """Stop background ambience and all effects."""
+    global _current_music
 
-    stop_forest()
+    if not _audio_ready:
+        return
 
-    if _audio_ready:
-        pygame.mixer.stop()
+    pygame.mixer.music.stop()
+    pygame.mixer.stop()
+    _current_music = None
 
-
-# --------------------------------------------------
-# Adjust volume
-# --------------------------------------------------
 
 def set_music_volume(volume):
-    """Set background volume between 0.0 and 1.0."""
-
     global MUSIC_VOLUME
 
     MUSIC_VOLUME = max(0.0, min(1.0, float(volume)))
@@ -260,8 +184,6 @@ def set_music_volume(volume):
 
 
 def set_effect_volume(volume):
-    """Set effects volume between 0.0 and 1.0."""
-
     global EFFECT_VOLUME
 
     EFFECT_VOLUME = max(0.0, min(1.0, float(volume)))

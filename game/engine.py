@@ -27,6 +27,7 @@ from ui.effects import (
 )
 
 from ui.audio import (
+    play_intro,
     play_forest,
     play_sound,
     stop_all_audio,
@@ -1022,15 +1023,12 @@ def run_game(saved_state=None, language="ar"):
 
     finally:
 
-        # Always stop the timer and audio when
-        # leaving the exploration loop.
+        
         explorer.pause_session()
 
         stop_all_audio()
-
-    # --------------------------------------------------
-    # Ending
-    # --------------------------------------------------
+        play_intro()
+   
 
     if game_finished:
 
@@ -1048,9 +1046,7 @@ def run_game(saved_state=None, language="ar"):
 
         display_ending(fate_id, loc)
 
-        # ----------------------------------------------
-        # Journey Summary
-        # ----------------------------------------------
+      
 
         console.print(
             Panel(

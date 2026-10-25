@@ -5,7 +5,7 @@ import questionary
 from rich.panel import Panel
 from rich.text import Text
 from rich.console import Group
-
+from ui.audio import play_intro
 from game.engine import run_game
 from game.save_system import load_game
 from game.explorers import display_hall
@@ -19,6 +19,7 @@ SOFT_GREEN = "#A3B18A"
 
 
 def show_main_menu():
+    play_intro()
     loc = Localization()
 
     while True:
