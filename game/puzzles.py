@@ -1,13 +1,12 @@
-# يحتوي الألغاز والإجابات والتلميحات
-# Handles randomized puzzles, answers, hints, and localization.
+# يحتوي الألغاز والإجابات والتلميحاتimport json
+
 
 import json
 import random
 from pathlib import Path
-
 import questionary
-
 from game.localization import Localization
+from game.scoring import Scoring
 
 
 DATA_DIR = Path(__file__).parent / "data"
@@ -38,15 +37,14 @@ def select_random_puzzles():
 
     for puzzle_id, questions in puzzle_bank.items():
         selected_index = random.randrange(len(questions))
+        selected_puzzle = questions[selected_index].copy()
 
-        selected_puzzles[puzzle_id] = questions[
-            selected_index
-        ].copy()
+        selected_puzzle["question_index"] = selected_index
+        selected_puzzle["wrong_attempts"] = 0
+        selected_puzzle["hint_used"] = False
+        selected_puzzle["earned_points"] = 0
 
-        # Preserve question index for translation and Save/Load.
-        selected_puzzles[puzzle_id]["question_index"] = (
-            selected_index
-        )
+        selected_puzzles[puzzle_id] = selected_puzzle
 
     return selected_puzzles
 
@@ -73,21 +71,20 @@ def solve_puzzle(
     options = puzzle["options"]
     hint = puzzle["hint"]
 
-    # Load the matching Arabic question while preserving
-    # the original correct answer.
+    puzzle.setdefault("wrong_attempts", 0)
+    puzzle.setdefault("hint_used", False)
+    puzzle.setdefault("earned_points", 0)
+
     if loc.language == "ar":
         arabic_bank = load_arabic_puzzles()
         question_index = puzzle.get("question_index")
 
-        # Compatibility with older saved games.
         if question_index is None:
             original_questions = load_puzzles().get(
                 puzzle_id, []
             )
 
-            for index, original in enumerate(
-                original_questions
-            ):
+            for index, original in enumerate(original_questions):
                 if original["question"] == puzzle["question"]:
                     question_index = index
                     break
@@ -120,6 +117,20 @@ def solve_puzzle(
             for index, option in enumerate(options, start=1)
         ]
 
+        if not puzzle["hint_used"]:
+            hint_label = (
+                "💡 عرض التلميح (-10 نقاط)"
+                if loc.language == "ar"
+                else "💡 Show Hint (-10 points)"
+            )
+
+            choices.append(
+                questionary.Choice(
+                    title=loc.format_arabic(hint_label),
+                    value="hint",
+                )
+            )
+
         journal_label = (
             "📜 عرض دفتر الرحلة"
             if loc.language == "ar"
@@ -141,11 +152,9 @@ def solve_puzzle(
             use_shortcuts=False,
         ).ask()
 
-        # Handle canceled selection.
         if answer is None:
             return False
 
-        # Open Journal without leaving the puzzle.
         if answer == "journal":
             if journal is not None:
                 journal.display()
@@ -159,33 +168,53 @@ def solve_puzzle(
 
             continue
 
-        # Check the original English puzzle's correct index.
+        if answer == "hint":
+            puzzle["hint_used"] = True
+
+            hint_label = (
+                "💡 تلميح"
+                if loc.language == "ar"
+                else "💡 Hint"
+            )
+
+            print(
+                f"\n{loc.format_arabic(hint_label)}: "
+                f"{loc.format_arabic(hint)}"
+            )
+
+            continue
+
         if answer == puzzle["correct"]:
+            earned_points = Scoring.calculate_puzzle_reward(
+                wrong_attempts=puzzle["wrong_attempts"],
+                hint_used=puzzle["hint_used"],
+            )
+
+            puzzle["earned_points"] = earned_points
+
             message = (
                 "✨ إجابة صحيحة! تكشف الغابة أحد أسرارها."
                 if loc.language == "ar"
                 else "✨ Correct! The forest reveals its secret."
             )
 
+            points_message = (
+                f"🏆 نقاط اللغز: {earned_points}/100"
+                if loc.language == "ar"
+                else f"🏆 Puzzle Points: {earned_points}/100"
+            )
+
             print(f"\n{loc.format_arabic(message)}")
+            print(loc.format_arabic(points_message))
+
             return True
 
-        # Show hint after an incorrect answer.
-        hint_label = (
-            "💡 تلميح"
-            if loc.language == "ar"
-            else "💡 Hint"
-        )
-
-        print(
-            f"\n{loc.format_arabic(hint_label)}: "
-            f"{loc.format_arabic(hint)}"
-        )
+        puzzle["wrong_attempts"] += 1
 
         message = (
-            "❌ إجابة خاطئة، حاول مجددًا."
+            "❌ إجابة خاطئة، حاول مجددًا. (-20 نقطة)"
             if loc.language == "ar"
-            else "❌ Incorrect answer. Try again."
+            else "❌ Incorrect answer, try again. (-20 points)"
         )
 
-        print(loc.format_arabic(message))
+        print(f"\n{loc.format_arabic(message)}")

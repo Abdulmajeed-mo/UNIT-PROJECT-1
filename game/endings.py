@@ -1,17 +1,12 @@
 # يحدد النهاية حسب إنجازات اللاعب
-
-# Determines the explorer's final fate based on score.
-
 import json
-import random
 from pathlib import Path
+
 from game.localization import Localization
 
 
 ENDINGS_FILE = Path(__file__).parent / "data" / "endings.json"
-
 ENDINGS_AR_FILE = Path(__file__).parent / "data" / "endings_ar.json"
-
 PASSING_SCORE = 600
 
 
@@ -20,21 +15,56 @@ def load_endings():
         return json.load(file)
 
 
-def determine_fate(scoring):
-    endings = load_endings()
-    total_score = scoring.get_total()
+def determine_fate(
+    scoring,
+    journal=None,
+    previous_choices=None,
+    selected_puzzles=None,
+):
+    total = scoring.get_total()
+    scores = scoring.scores
 
-    if total_score >= PASSING_SCORE:
-        category = "positive"
-    else:
-        category = "negative"
+    discoveries = set(journal.discoveries) if journal else set()
+    choices = previous_choices or {}
+    puzzles = selected_puzzles or {}
 
-    possible_fates = list(endings[category].keys())
+    correct_puzzles = (
+        len(journal.solved_puzzles)
+        if journal
+        else sum(
+            1 for puzzle in puzzles.values()
+            if puzzle.get("earned_points", 0) > 0
+        )
+    )
 
-    fate_id = random.choice(possible_fates)
+    positive = total >= PASSING_SCORE
 
-    return fate_id
+    if positive:
+        if (
+            total >= 800
+            and correct_puzzles >= 3
+            and len(discoveries) >= 2
+        ):
+            return "golden_awakening"
 
+        if (
+            "forest_memory" in discoveries
+            and scores.get("secrets", 0) >= 100
+        ):
+            return "forest_keeper"
+
+        return "way_beyond"
+
+    if scores.get("puzzles", 0) < 150:
+        return "forgotten_soul"
+
+    if (
+        scores.get("decisions", 0) < 80
+        or choices.get(2) == 2
+    ):
+        return "roots_of_eternity"
+
+    return "eternal_wanderer"
 
 
 def get_fate_title(fate_id, loc=None):
@@ -96,5 +126,5 @@ def display_ending(fate_id, loc=None):
         if loc.language == "ar"
         else "Unknown fate."
     )
-    print(f"\n{loc.format_arabic(message)}")
 
+    print(f"\n{loc.format_arabic(message)}")

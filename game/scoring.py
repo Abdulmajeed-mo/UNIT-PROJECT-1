@@ -1,5 +1,3 @@
-# Manages explorer scores and prevents duplicate rewards.
-
 from rich.panel import Panel
 from rich.table import Table
 from rich.progress_bar import ProgressBar
@@ -37,6 +35,11 @@ class Scoring:
         "secrets": "✨",
     }
 
+    PUZZLE_BASE_POINTS = 100
+    WRONG_ANSWER_PENALTY = 20
+    HINT_PENALTY = 10
+    MIN_PUZZLE_POINTS = 30
+
     def __init__(self, loc=None):
         self.loc = loc if loc is not None else Localization("en")
 
@@ -45,6 +48,18 @@ class Scoring:
             for category in self.MAX_SCORES
         }
         self.rewarded_actions = set()
+
+    @classmethod
+    def calculate_puzzle_reward(cls, wrong_attempts=0, hint_used=False):
+        wrong_attempts = max(0, int(wrong_attempts))
+
+        points = cls.PUZZLE_BASE_POINTS
+        points -= wrong_attempts * cls.WRONG_ANSWER_PENALTY
+
+        if hint_used:
+            points -= cls.HINT_PENALTY
+
+        return max(cls.MIN_PUZZLE_POINTS, points)
 
     def add_points(self, category, action_id, points):
         if category not in self.scores:
@@ -55,7 +70,7 @@ class Scoring:
         if reward_key in self.rewarded_actions:
             return False
 
-        if points <= 0:
+        if not isinstance(points, int) or points <= 0:
             return False
 
         maximum = self.MAX_SCORES[category]
@@ -71,8 +86,14 @@ class Scoring:
 
         return True
 
+    def get_category_score(self, category):
+        return self.scores.get(category, 0)
+
     def get_total(self):
         return sum(self.scores.values())
+
+    def get_maximum_total(self):
+        return sum(self.MAX_SCORES.values())
 
     def display_score(self):
         title = (
@@ -108,7 +129,7 @@ class Scoring:
             table.add_row(label, f"{score}/{maximum}")
 
         total = self.get_total()
-        maximum_total = sum(self.MAX_SCORES.values())
+        maximum_total = self.get_maximum_total()
 
         total_label = (
             "المجموع"
